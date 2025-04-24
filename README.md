@@ -1,28 +1,28 @@
-# ArXiv论文搜索和邮件发送工具
+# ArXiv Paper Search and Email Tool
 
-这是一个自动化工具，可以：
-1. 搜索ArXiv上的最新论文
-2. 将搜索结果通过Gmail发送到指定邮箱
+This is an automated tool that can:
+1. Search for the latest papers on ArXiv
+2. Send search results via Gmail to a specified email address
 
-## 环境要求
+## Requirements
 - Python 3.8+
-- 必要的API密钥（在.env文件中配置）
+- Required API keys (configured in the .env file)
 
-## 安装步骤
+## Installation
 
-1. 克隆仓库：
+1. Clone the repository:
 ```bash
 git clone https://github.com/fak111/aci-agents.git
 cd aci-agents
 ```
 
-2. 安装依赖：
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. 配置环境变量：
-创建一个.env文件，包含以下内容：
+3. Configure environment variables:
+Create a .env file with the following content:
 ```
 ACI_API_KEY=your_aci_api_key
 OPENROUTER_API_KEY=your_openrouter_api_key
@@ -31,29 +31,29 @@ RECIPIENT_EMAIL=recipient_email_address
 GMAIL_APP_PASSWORD=your_gmail_app_password
 ```
 
-## 使用方法
+## Usage
 
-1. 直接运行脚本：
+1. Run scripts directly:
 ```bash
 uv run search_paper.py
-# 或者
+# or
 uv run arxiv_gmail.py
 ```
 
-2. 作为模块导入：
+2. Import as a module:
 ```python
 from search_paper import main
 
 main("Search for 5 recent RL papers in 2025", "your-email@example.com")
 ```
 
-## 注意事项
-- 确保您有正确的API密钥和权限
-- Gmail API需要适当的授权
-- ArXiv API可能有使用限制
+## Notes
+- Ensure you have the correct API keys and permissions
+- Gmail API requires proper authorization
+- ArXiv API may have usage limitations
 
-## 功能特点
-- 支持自定义搜索查询
-- 自动格式化邮件内容
-- 包含论文标题、作者、链接和摘要
-- 使用Claude 3 Opus进行智能处理
+## Features
+- Support for custom search queries
+- Automatic email content formatting
+- Includes paper titles, authors, links, and abstracts
+- Uses Claude 3 Opus for intelligent processing

@@ -10,7 +10,7 @@ load_dotenv(verbose=True)
 ACI_API_KEY = os.getenv("ACI_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-# 初始化OpenAI客户端（使用OpenRouter）
+# Initialize OpenAI client (using OpenRouter)
 openai = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=OPENROUTER_API_KEY,
@@ -22,18 +22,18 @@ openai = OpenAI(
 aci = ACI(api_key=ACI_API_KEY)
 
 def format_email_content(papers):
-    """格式化邮件内容"""
-    email_content = "最新研究论文摘要：\n\n"
+    """Format email content"""
+    email_content = "Latest Research Paper Summaries:\n\n"
     for i, paper in enumerate(papers, 1):
         email_content += f"{i}. {paper.get('title', 'No Title')}\n"
-        email_content += f"作者: {', '.join(paper.get('authors', ['Unknown']))}\n"
-        email_content += f"链接: {paper.get('url', 'No URL')}\n"
-        email_content += f"摘要: {paper.get('summary', 'No abstract available')}\n\n"
+        email_content += f"Authors: {', '.join(paper.get('authors', ['Unknown']))}\n"
+        email_content += f"Link: {paper.get('url', 'No URL')}\n"
+        email_content += f"Abstract: {paper.get('summary', 'No abstract available')}\n\n"
     return email_content
 
 def main(query: str, email_to: str) -> None:
-    # 获取ArXiv搜索功能定义
-    print("获取ArXiv搜索功能定义")
+    # Get ArXiv search function definition
+    print("Getting ArXiv search function definition")
     arxiv_search_function = {
         "name": "ARXIV__SEARCH_PAPERS",
         "description": "Search for papers on ArXiv",
@@ -53,8 +53,8 @@ def main(query: str, email_to: str) -> None:
         }
     }
 
-    # 获取Gmail发送功能定义
-    print("获取Gmail发送功能定义")
+    # Get Gmail sending function definition
+    print("Getting Gmail sending function definition")
     gmail_send_function = {
         "name": "GMAIL__SEND_EMAIL",
         "description": "Send an email via Gmail",
@@ -78,13 +78,13 @@ def main(query: str, email_to: str) -> None:
         }
     }
 
-    print("发送请求到OpenRouter进行论文搜索")
+    print("Sending request to OpenRouter for paper search")
     search_response = openai.chat.completions.create(
         model="anthropic/claude-3-opus-20240229",
         messages=[
             {
                 "role": "system",
-                "content": "你是一个专业的研究助手，可以搜索和总结学术论文。请使用ArXiv API搜索论文。",
+                "content": "You are a professional research assistant who can search and summarize academic papers. Please use the ArXiv API to search for papers.",
             },
             {
                 "role": "user",
@@ -102,7 +102,7 @@ def main(query: str, email_to: str) -> None:
     )
 
     if search_tool_call:
-        print("处理ArXiv搜索请求")
+        print("Processing ArXiv search request")
         search_args = json.loads(search_tool_call.function.arguments)
         if "max_results" not in search_args:
             search_args["max_results"] = 5
@@ -110,24 +110,24 @@ def main(query: str, email_to: str) -> None:
         search_result = aci.handle_function_call(
             search_tool_call.function.name,
             search_args,
-            linked_account_owner_id="123"  # 替换为实际ID
+            linked_account_owner_id="123"  # Replace with actual ID
         )
 
-        # 格式化邮件内容
-        papers = search_result.get('entries', [])  # 使用entries而不是papers
+        # Format email content
+        papers = search_result.get('entries', [])  # Use entries instead of papers
         email_content = format_email_content(papers)
 
-        print("发送请求到OpenRouter进行邮件发送")
+        print("Sending request to OpenRouter for email sending")
         email_response = openai.chat.completions.create(
             model="anthropic/claude-3-opus-20240229",
             messages=[
                 {
                     "role": "system",
-                    "content": "你是一个邮件助手，负责发送邮件。",
+                    "content": "You are an email assistant responsible for sending emails.",
                 },
                 {
                     "role": "user",
-                    "content": f"请将以下内容发送到{email_to}：\n\n{email_content}",
+                    "content": f"Please send the following content to {email_to}:\n\n{email_content}",
                 },
             ],
             tools=[gmail_send_function],
@@ -141,20 +141,20 @@ def main(query: str, email_to: str) -> None:
         )
 
         if email_tool_call:
-            print("发送邮件")
+            print("Sending email")
             email_args = json.loads(email_tool_call.function.arguments)
             if "subject" not in email_args:
-                email_args["subject"] = "最新ArXiv论文搜索结果"
+                email_args["subject"] = "Latest ArXiv Paper Search Results"
 
             email_result = aci.handle_function_call(
                 email_tool_call.function.name,
                 email_args,
-                linked_account_owner_id="123"  # 替换为实际ID
+                linked_account_owner_id="123"  # Replace with actual ID
             )
-            print("邮件发送结果：", email_result)
+            print("Email sending result:", email_result)
 
 if __name__ == "__main__":
-    # 示例使用
+    # Example usage
     query = "Search for 5 recent RL papers in 2025"
     email_to = os.getenv("RECIPIENT_EMAIL")
     main(query, email_to)
